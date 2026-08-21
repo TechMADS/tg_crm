@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+  deals     Deal[]
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String?  @unique
+  phone     String?
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+  deals     Deal[]
+  notes     Note[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Company {
+  id        String    @id @default(cuid())
+  name      String
+  website   String?
+  industry  String?
+  contacts  Contact[]
+  deals     Deal[]
+  createdAt DateTime  @default(now())
+}
+
+model Deal {
+  id         String   @id @default(cuid())
+  title      String
+  value      Float    @default(0)
+  stage      String   @default("new") // new, contacted, proposal, won, lost
+  contact    Contact? @relation(fields: [contactId], references: [id])
+  contactId  String?
+  company    Company? @relation(fields: [companyId], references: [id])
+  companyId  String?
+  owner      User?    @relation(fields: [ownerId], references: [id])
+  ownerId    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  content   String
+  contact   Contact? @relation(fields: [contactId], references: [id])
+  contactId String?
+  createdAt DateTime @default(now())
+}
